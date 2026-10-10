@@ -96,6 +96,8 @@ Student | Interested in Software Development and Artificial Intelligence
 
 GitHub: https://github.com/ballaryakshay661-lang/STUDY-TRACK
 
+[🚀 Open StudyTrack Website](https://ballaryakshay661-lang.github.io/STUDY-TRACK/)
+
 📄 License
 
 Choose and add an appropriate open-source license before claiming that the project is released under one.
