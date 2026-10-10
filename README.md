@@ -94,7 +94,7 @@ Akshay C. Ballary
 
 Student | Interested in Software Development and Artificial Intelligence
 
-GitHub: https://github.com/ballaryakshay661-lang
+GitHub: https://github.com/ballaryakshay661-lang/STUDY-TRACK
 
 📄 License
 
