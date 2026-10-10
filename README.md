@@ -5,6 +5,10 @@
 A simple and responsive web application that helps students organize
 assignments, manage deadlines, and track their academic progress.
 
+🌐 Website
+
+Open the app here: http://localhost:5500/
+
 🎯 About the Project
 
 StudyTrack helps students manage their academic tasks in one place. It provides
