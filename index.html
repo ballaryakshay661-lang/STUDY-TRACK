@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="StudyTrack helps you organize assignments and keep deadlines in view."
+    />
+    <title>StudyTrack — Assignment Planner</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="StudyTrack home">
+        <span class="brand-mark" aria-hidden="true">S</span>
+        <span>StudyTrack</span>
+      </a>
+      <p class="header-note">A little more organized, every day.</p>
+    </header>
+
+    <main class="page-shell">
+      <section class="welcome-section" aria-labelledby="welcome-heading">
+        <div>
+          <p class="eyebrow">YOUR STUDY SPACE</p>
+          <h1 id="welcome-heading">Make room for your best work.</h1>
+          <p class="welcome-copy">
+            Keep every assignment in one place and stay one step ahead of your deadlines.
+          </p>
+        </div>
+        <div class="welcome-art" aria-hidden="true">
+          <span class="art-sparkle">✦</span>
+          <span class="art-page">
+            <span></span><span></span><span></span>
+          </span>
+          <span class="art-check">✓</span>
+        </div>
+      </section>
+
+      <section class="dashboard-section" aria-labelledby="dashboard-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">AT A GLANCE</p>
+            <h2 id="dashboard-heading">Your dashboard</h2>
+          </div>
+          <p class="today-date" id="today-date"></p>
+        </div>
+        <div class="summary-grid" aria-live="polite" aria-atomic="true">
+          <article class="summary-card summary-card-total">
+            <span class="summary-icon" aria-hidden="true">▤</span>
+            <p class="summary-label">Total assignments</p>
+            <p class="summary-value" id="total-count">0</p>
+          </article>
+          <article class="summary-card summary-card-pending">
+            <span class="summary-icon" aria-hidden="true">◷</span>
+            <p class="summary-label">Still to do</p>
+            <p class="summary-value" id="pending-count">0</p>
+          </article>
+          <article class="summary-card summary-card-completed">
+            <span class="summary-icon" aria-hidden="true">✓</span>
+            <p class="summary-label">Completed</p>
+            <p class="summary-value" id="completed-count">0</p>
+          </article>
+          <article class="summary-card summary-card-overdue">
+            <span class="summary-icon" aria-hidden="true">!</span>
+            <p class="summary-label">Overdue</p>
+            <p class="summary-value" id="overdue-count">0</p>
+          </article>
+        </div>
+      </section>
+
+      <div class="workspace-grid">
+        <section class="panel form-panel" aria-labelledby="form-heading">
+          <div class="panel-heading">
+            <span class="panel-icon" aria-hidden="true">＋</span>
+            <div>
+              <p class="eyebrow">PLAN AHEAD</p>
+              <h2 id="form-heading">Add an assignment</h2>
+            </div>
+          </div>
+          <form id="assignment-form">
+            <div class="field-group">
+              <label for="assignment-title">Assignment name</label>
+              <input
+                id="assignment-title"
+                name="title"
+                type="text"
+                placeholder="e.g. History essay"
+                maxlength="100"
+                required
+              />
+            </div>
+            <div class="field-group">
+              <label for="assignment-course">Class or subject</label>
+              <input
+                id="assignment-course"
+                name="course"
+                type="text"
+                placeholder="e.g. World History"
+                maxlength="60"
+                required
+              />
+            </div>
+            <div class="field-group">
+              <label for="assignment-due-date">Due date</label>
+              <input id="assignment-due-date" name="dueDate" type="date" required />
+            </div>
+            <div class="field-group">
+              <label for="assignment-priority">Priority</label>
+              <select id="assignment-priority" name="priority" required>
+                <option value="medium" selected>Medium</option>
+                <option value="low">Low</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <button class="primary-button" type="submit">
+              <span aria-hidden="true">＋</span> Add assignment
+            </button>
+            <button class="secondary-button" id="cancel-edit" type="button" hidden>Cancel editing</button>
+            <p class="form-hint">You can mark it complete whenever you’re done.</p>
+            <p class="form-message" id="form-message" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section class="panel tasks-panel" aria-labelledby="tasks-heading">
+          <div class="tasks-heading-row">
+            <div class="panel-heading">
+              <span class="panel-icon panel-icon-list" aria-hidden="true">☷</span>
+              <div>
+                <p class="eyebrow">YOUR WORKLOAD</p>
+                <h2 id="tasks-heading">Assignments</h2>
+              </div>
+            </div>
+            <span class="task-total" id="list-count">0 tasks</span>
+          </div>
+
+          <div class="filter-row" role="group" aria-label="Filter assignments">
+            <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">
+              All <span id="all-filter-count">0</span>
+            </button>
+            <button class="filter-button" type="button" data-filter="pending" aria-pressed="false">
+              Pending <span id="pending-filter-count">0</span>
+            </button>
+            <button class="filter-button" type="button" data-filter="completed" aria-pressed="false">
+              Completed <span id="completed-filter-count">0</span>
+            </button>
+          </div>
+
+          <ul class="task-list" id="task-list" aria-live="polite" aria-relevant="additions removals text"></ul>
+          <div class="empty-state" id="empty-state">
+            <span class="empty-icon" aria-hidden="true">✎</span>
+            <h3 id="empty-heading">Your list is a blank page.</h3>
+            <p id="empty-copy">Add your first assignment to start building a plan.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <p>One step at a time. You’ve got this.</p>
+    </footer>
+  </body>
+</html>
