@@ -7,8 +7,16 @@
       name="description"
       content="StudyTrack helps you organize assignments and keep deadlines in view."
     />
+    <meta name="studytrack-api-base" content="http://localhost:5000" />
     <title>StudyTrack — Assignment Planner</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
+      defer
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="js/auth.js" defer></script>
     <script src="js/app.js" defer></script>
   </head>
   <body>
@@ -17,10 +25,107 @@
         <span class="brand-mark" aria-hidden="true">S</span>
         <span>StudyTrack</span>
       </a>
-      <p class="header-note">A little more organized, every day.</p>
+      <div class="header-actions">
+        <p class="header-note">A little more organized, every day.</p>
+        <span class="account-label" id="account-label" hidden></span>
+        <button class="logout-button" id="logout-button" type="button" hidden>
+          Log out
+        </button>
+      </div>
     </header>
 
-    <main class="page-shell">
+    <p class="session-notice" id="session-notice" role="status" aria-live="polite" hidden></p>
+
+    <section class="auth-shell" id="auth-shell" aria-labelledby="auth-heading">
+      <div class="auth-card">
+        <span class="auth-mark" aria-hidden="true">✦</span>
+        <p class="eyebrow" id="auth-eyebrow">YOUR STUDY SPACE</p>
+        <h1 id="auth-heading">Welcome back.</h1>
+        <p class="auth-copy" id="auth-copy">
+          Sign in to open your StudyTrack planner.
+        </p>
+
+        <div class="auth-tabs" role="group" aria-label="Account action">
+          <button
+            class="auth-tab is-active"
+            id="login-mode"
+            type="button"
+            data-auth-mode="login"
+            aria-pressed="true"
+          >
+            Log in
+          </button>
+          <button
+            class="auth-tab"
+            id="register-mode"
+            type="button"
+            data-auth-mode="register"
+            aria-pressed="false"
+          >
+            Sign up
+          </button>
+        </div>
+
+        <form id="auth-form" novalidate>
+          <div class="field-group" id="auth-name-group" hidden>
+            <label for="auth-name">Your name</label>
+            <input
+              id="auth-name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              maxlength="80"
+              required
+              disabled
+            />
+          </div>
+          <div class="field-group">
+            <label for="auth-email">Email address</label>
+            <input
+              id="auth-email"
+              name="email"
+              type="email"
+              autocomplete="username"
+              maxlength="254"
+              required
+              disabled
+            />
+          </div>
+          <div class="field-group">
+            <label for="auth-password">Password</label>
+            <input
+              id="auth-password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              minlength="8"
+              maxlength="72"
+              aria-describedby="auth-password-hint"
+              required
+              disabled
+            />
+            <p class="auth-password-hint" id="auth-password-hint">
+              Use at least 8 characters (maximum 72 UTF-8 bytes).
+            </p>
+          </div>
+          <p
+            class="auth-message"
+            id="auth-message"
+            role="alert"
+            aria-live="assertive"
+          ></p>
+          <button class="primary-button auth-submit" id="auth-submit" type="submit" disabled>
+            <span id="auth-submit-label">Checking your session…</span>
+          </button>
+        </form>
+        <p class="auth-footer" id="auth-footer">
+          New to StudyTrack?
+          <button type="button" data-auth-mode="register">Create an account</button>
+        </p>
+      </div>
+    </section>
+
+    <main class="page-shell" id="protected-app" inert aria-hidden="true">
       <section class="welcome-section" aria-labelledby="welcome-heading">
         <div>
           <p class="eyebrow">YOUR STUDY SPACE</p>
@@ -36,13 +141,14 @@
           </span>
           <span class="art-check">✓</span>
         </div>
+
       </section>
 
       <section class="dashboard-section" aria-labelledby="dashboard-heading">
         <div class="section-heading">
           <div>
             <p class="eyebrow">AT A GLANCE</p>
-            <h2 id="dashboard-heading">Your dashboard</h2>
+            <h2 id="dashboard-heading">Study Progress Dashboard</h2>
           </div>
           <p class="today-date" id="today-date"></p>
         </div>
@@ -67,7 +173,136 @@
             <p class="summary-label">Overdue</p>
             <p class="summary-value" id="overdue-count">0</p>
           </article>
+          <article class="summary-card summary-card-today">
+            <span class="summary-icon" aria-hidden="true">◷</span>
+            <p class="summary-label">Due today</p>
+            <p class="summary-value" id="due-today-count">0</p>
+          </article>
+          <article class="summary-card summary-card-focus">
+            <span class="summary-icon" aria-hidden="true">⏱</span>
+            <p class="summary-label">Focus minutes</p>
+            <p class="summary-value" id="focus-minutes-count">0</p>
+          </article>
+          <article class="summary-card summary-card-progress">
+            <span class="summary-icon" aria-hidden="true">%</span>
+            <p class="summary-label">Overall completion</p>
+            <p class="summary-value" id="completion-percentage">0%</p>
+            <progress
+              class="completion-progress"
+              id="completion-progress"
+              max="100"
+              value="0"
+              aria-label="Overall assignment completion"
+            ></progress>
+          </article>
         </div>
+
+        <div class="progress-charts" aria-label="Assignment progress charts">
+          <article class="progress-chart-card">
+            <h3 id="completion-chart-heading">Assignment completion</h3>
+            <p class="chart-description">Completed compared with pending assignments.</p>
+            <div class="chart-canvas-wrap">
+              <canvas
+                id="completion-chart"
+                role="img"
+                aria-labelledby="completion-chart-heading"
+                aria-describedby="completion-chart-description"
+              ></canvas>
+            </div>
+            <p class="chart-description chart-data-description" id="completion-chart-description"></p>
+            <p class="chart-unavailable" hidden>Chart visualization is unavailable. The summary above is still up to date.</p>
+            <p class="chart-empty" id="completion-chart-empty" hidden>No assignments yet to chart.</p>
+          </article>
+
+          <article class="progress-chart-card">
+            <h3 id="subject-chart-heading">Progress by subject</h3>
+            <p class="chart-description">Completed and pending assignments for each subject.</p>
+            <div class="chart-canvas-wrap chart-canvas-wrap-wide">
+              <canvas
+                id="subject-chart"
+                role="img"
+                aria-labelledby="subject-chart-heading"
+                aria-describedby="subject-chart-description"
+              ></canvas>
+            </div>
+            <p class="chart-description chart-data-description" id="subject-chart-description"></p>
+            <p class="chart-unavailable" hidden>Chart visualization is unavailable. The summary above is still up to date.</p>
+            <p class="chart-empty" id="subject-chart-empty" hidden>No subject data yet to chart.</p>
+          </article>
+
+          <article class="progress-chart-card progress-chart-card-wide">
+            <h3 id="weekly-chart-heading">Weekly completion activity</h3>
+            <p class="chart-description">Assignments marked complete over the last seven calendar days, including today.</p>
+            <div class="chart-canvas-wrap chart-canvas-wrap-weekly">
+              <canvas
+                id="weekly-chart"
+                role="img"
+                aria-labelledby="weekly-chart-heading"
+                aria-describedby="weekly-chart-description"
+              ></canvas>
+            </div>
+            <p class="chart-description chart-data-description" id="weekly-chart-description"></p>
+            <p class="chart-note" id="weekly-chart-note"></p>
+            <p class="chart-unavailable" hidden>Chart visualization is unavailable. The summary above is still up to date.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="study-tools-grid" aria-label="Study planner and focus timer">
+        <section class="panel plan-panel" aria-labelledby="study-plan-heading">
+          <div class="panel-heading">
+            <span class="panel-icon" aria-hidden="true">✦</span>
+            <div>
+              <p class="eyebrow">YOUR NEXT STEPS</p>
+              <h2 id="study-plan-heading">Today's Study Plan</h2>
+            </div>
+          </div>
+          <p class="panel-intro">Pending work, ordered by deadline and priority.</p>
+          <ol class="recommendation-list" id="recommendation-list" aria-live="polite"></ol>
+          <div class="plan-empty-state" id="plan-empty-state" hidden>
+            <h3>Nothing pending right now.</h3>
+            <p>Add an assignment or enjoy your clear schedule.</p>
+          </div>
+        </section>
+
+        <section class="panel timer-panel" aria-labelledby="focus-timer-heading">
+          <div class="panel-heading">
+            <span class="panel-icon timer-panel-icon" aria-hidden="true">⏱</span>
+            <div>
+              <p class="eyebrow">ONE THING AT A TIME</p>
+              <h2 id="focus-timer-heading">Focus Timer</h2>
+            </div>
+          </div>
+
+          <div class="timer-modes" role="group" aria-label="Choose timer mode">
+            <button class="timer-mode-button is-active" type="button" data-timer-mode="focus" aria-pressed="true">Focus · 25 min</button>
+            <button class="timer-mode-button" type="button" data-timer-mode="short" aria-pressed="false">Short break · 5 min</button>
+            <button class="timer-mode-button" type="button" data-timer-mode="long" aria-pressed="false">Long break · 15 min</button>
+          </div>
+
+          <p class="timer-display" id="timer-display" role="timer" aria-label="25 minutes remaining">25:00</p>
+          <p class="timer-task-label" id="timer-task-label">No assignment selected</p>
+          <p class="timer-status" id="timer-status" role="status" aria-live="polite">Choose a task or start a focus session when you're ready.</p>
+
+          <div class="timer-controls" role="group" aria-label="Timer controls">
+            <button class="primary-button timer-control-button" id="timer-start" type="button">Start</button>
+            <button class="secondary-button timer-control-button" id="timer-pause" type="button" disabled>Pause</button>
+            <button class="secondary-button timer-control-button" id="timer-resume" type="button" disabled>Resume</button>
+            <button class="secondary-button timer-control-button" id="timer-reset" type="button" disabled>Reset</button>
+          </div>
+
+          <div class="custom-duration">
+            <label for="custom-focus-minutes">Custom focus length</label>
+            <div class="custom-duration-controls">
+              <input id="custom-focus-minutes" type="number" min="1" max="180" step="1" value="25" inputmode="numeric" />
+              <span>minutes</span>
+              <button class="task-action-button" id="apply-custom-duration" type="button">Apply</button>
+            </div>
+            <p class="timer-session-summary">
+              Completed focus sessions: <strong id="focus-session-count">0</strong>
+            </p>
+          </div>
+        </section>
       </section>
 
       <div class="workspace-grid">
@@ -145,6 +380,25 @@
             <button class="filter-button" type="button" data-filter="completed" aria-pressed="false">
               Completed <span id="completed-filter-count">0</span>
             </button>
+          </div>
+
+          <div class="advanced-filters">
+            <div class="filter-field">
+              <label for="subject-filter">Subject</label>
+              <select id="subject-filter">
+                <option value="">All subjects</option>
+              </select>
+            </div>
+
+            <div class="filter-field">
+              <label for="priority-filter">Priority</label>
+              <select id="priority-filter">
+                <option value="">All priorities</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
           </div>
 
           <ul class="task-list" id="task-list" aria-live="polite" aria-relevant="additions removals text"></ul>
